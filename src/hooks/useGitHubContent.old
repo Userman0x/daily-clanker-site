@@ -1,0 +1,70 @@
+// src/hooks/useGitHubContent.ts
+import { useState, useEffect } from 'react';
+
+export interface Article {
+  id: string;
+  title: string;
+  excerpt: string;
+  content: string;
+  image: string;
+  date: string;
+  author: string;
+  category: string;
+}
+
+const useGitHubContent = (): {
+  articles: Article[];
+  loading: boolean;
+  error: string | null;
+} => {
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [loading, setLoading]   = useState(true);
+  const [error, setError]       = useState<string | null>(null);
+
+  /* ------------------------------------------------------------------- */
+  /*  YOUR RAW URL – copy the one you verified works in the browser   */
+  /* ------------------------------------------------------------------- */
+  const ARTICLES_RAW_URL =
+    'https://raw.githubusercontent.com/Userman0x/daily-clanker/main/articles.json';
+
+  useEffect(() => {
+    const controller = new AbortController();   // abort if component unmounts
+    const signal = controller.signal;
+
+    const fetchData = async () => {
+      try {
+        const resp = await fetch(ARTICLES_RAW_URL, { signal });
+
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+
+        const data = await resp.json();
+
+        if (!Array.isArray(data))
+          throw new Error('Expected an array of articles');
+
+        setArticles(data);   // success
+      } catch (e: any) {
+        /* ---------------------------------------------------------------- */
+        /*  Ignore AbortError caused by component unmounting                 */
+        /* ---------------------------------------------------------------- */
+        if (e.name === 'AbortError') {
+          return; // silently ignore
+        }
+
+        console.error('useGitHubContent: failed to load articles', e);
+        setError('Could not load articles. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+
+    // clean‑up: abort the fetch if the component unmounts
+    return () => controller.abort();
+  }, [ARTICLES_RAW_URL]);   // URL never changes – effect runs only once
+
+  return { articles, loading, error };
+};
+
+export default useGitHubContent;
