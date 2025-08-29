@@ -36,7 +36,7 @@ const Header: React.FC<HeaderProps> = ({ onSearch, searchQuery, selectedCategory
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
             <img 
-              src="./images/logo.png" 
+              src="/images/logo.png" 
               alt="Daily Clanker" 
               className="h-8 sm:h-10 md:h-12 w-auto"
             />
