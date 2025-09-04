@@ -52,7 +52,6 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ article, onClick }) => {
           {article.title}
         </h2>
         
-        {/* Manually style the links and apply line-clamp */}
         <div className="text-sm text-gray-700 leading-relaxed line-clamp-2">
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
