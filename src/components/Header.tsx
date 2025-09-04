@@ -27,12 +27,14 @@ const Header: React.FC<HeaderProps> = ({
   const [isMobileSearchOpen, setIsMobileSearchOpen] = React.useState(false);
 
   const categories = [
-    { id: 'all', label: 'Latest' },
-    { id: 'technology', label: 'Tech' },
-    { id: 'business', label: 'Business' },
-    { id: 'politics', label: 'Politics' },
-    { id: 'opinion', label: 'Opinion' },
-  ];
+  { id: 'all', label: 'Latest' },      // default
+  { id: 'news', label: 'News' },
+  { id: 'sports', label: 'Sports' },
+  { id: 'technology', label: 'Tech' },
+  { id: 'business', label: 'Business' },
+  { id: 'politics', label: 'Politics' },
+  { id: 'gaming', label: 'Gaming' },
+];
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
