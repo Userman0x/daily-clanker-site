@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Search, Menu, X } from 'lucide-react';
+import { Menu, X as XIcon, ChevronDown } from 'lucide-react';
 
 interface ArticleHeadline {
   id: string;
@@ -24,31 +24,59 @@ const Header: React.FC<HeaderProps> = ({
 }) => {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
-  const [isMobileSearchOpen, setIsMobileSearchOpen] = React.useState(false);
+  const [openSubmenu, setOpenSubmenu] = React.useState<string | null>(null);
 
   const categories = [
-  { id: 'all', label: 'Latest' },      // default
-  { id: 'news', label: 'News' },
-  { id: 'sports', label: 'Sports' },
-  { id: 'technology', label: 'Tech' },
-  { id: 'business', label: 'Business' },
-  { id: 'politics', label: 'Politics' },
-  { id: 'gaming', label: 'Gaming' },
-  { id: 'opinion', label: 'Opinion' }
-];
+    { id: 'news', label: 'News' },
+    { id: 'sports', label: 'Sports' },
+    { id: 'technology', label: 'Tech' },
+    { id: 'business', label: 'Business' },
+    { id: 'politics', label: 'Politics' },
+    { id: 'gaming', label: 'Gaming' },
+    { id: 'opinion', label: 'Opinion' }
+  ];
+
+  const mainMenuItems = [
+    {
+      id: 'latest',
+      label: 'Latest',
+      action: () => onCategorySelect('all')
+    },
+    {
+      id: 'categories',
+      label: 'Categories',
+      hasSubmenu: true,
+      submenu: categories.map(cat => ({
+        ...cat,
+        action: () => onCategorySelect(cat.id)
+      }))
+    },
+    {
+      id: 'cword',
+      label: '$CWORD',
+      action: () => navigate('/cword')
+    }
+  ];
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
-    setIsMobileSearchOpen(false);
+    setOpenSubmenu(null);
   };
 
-  const toggleMobileSearch = () => {
-    setIsMobileSearchOpen(!isMobileSearchOpen);
-    setIsMobileMenuOpen(false);
+  const handleSubmenuToggle = (menuId: string) => {
+    setOpenSubmenu(openSubmenu === menuId ? null : menuId);
+  };
+
+  const handleMenuItemClick = (item: any) => {
+    if (item.action) {
+      item.action();
+      setIsMobileMenuOpen(false);
+      setOpenSubmenu(null);
+    }
   };
 
   return (
-    <header className="  bg-cream-200 border-b border-gray-800 sticky top-0 z-50">
+    <header className="bg-cream-200 border-b border-gray-800 sticky top-0 z-50">
       {/* Top banner */}
       <div className="bg-black text-cream-50 text-center py-1 text-xs font-medium">
         ROBOT NEWS ONLY A HUMAN COULD BELIEVE
@@ -84,80 +112,108 @@ const Header: React.FC<HeaderProps> = ({
             </div>
           </button>
 
-          {/* Search / menu */}
+          {/* X Logo and Mobile Menu */}
           <div className="flex items-center space-x-4">
-            <div className="relative hidden lg:block">
-              <input
-                type="text"
-                placeholder="Search..."
-                value={searchQuery}
-                onChange={(e) => onSearch(e.target.value)}
-                className="w-48 pl-8 pr-4 py-2 border border-gray-800 rounded text-sm focus:ring-1 focus:ring-black focus:border-black   bg-cream-200"
-              />
-              <Search
-                className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-600"
-                size={14}
-              />
-            </div>
+            <a
+  href="https://x.com"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="flex items-center space-x-2 p-2 hover:bg-cream-300 rounded transition-colors"
+  aria-label="Follow us on X"
+>
+  {/* Mobile: only the big X */}
+  <span className="text-2xl font-extrabold text-black lg:hidden">𝕏</span>
 
-            <button onClick={toggleMobileSearch} className="lg:hidden p-2 hover: bg-cream-200 rounded">
-              <Search size={18} />
-            </button>
+  {/* Desktop: Follow on + big bold X */}
+  <span className="hidden lg:flex items-center space-x-2">
+    <span className="text-sm font-medium text-black">Follow on</span>
+    <span className="text-3xl font-extrabold text-black leading-none">𝕏</span>
+  </span>
+</a>
 
-            <button onClick={toggleMobileMenu} className="lg:hidden p-2 hover: bg-cream-200 rounded">
+
+
+            <button onClick={toggleMobileMenu} className="lg:hidden p-2 hover:bg-cream-300 rounded">
               <Menu size={20} />
             </button>
           </div>
         </div>
-
-        {/* Mobile Search */}
-        {isMobileSearchOpen && (
-          <div className="lg:hidden pb-4">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search..."
-                value={searchQuery}
-                onChange={(e) => onSearch(e.target.value)}
-                className="w-full pl-8 pr-10 py-2 border border-gray-800 rounded text-sm focus:ring-1 focus:ring-black focus:border-black   bg-cream-200"
-                autoFocus
-              />
-              <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-600" size={14} />
-              <button
-                onClick={() => setIsMobileSearchOpen(false)}
-                className="absolute right-2.5 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-black"
-              >
-                <X size={14} />
-              </button>
-            </div>
-          </div>
-        )}
       </div>
 
-      <nav className={`${isMobileMenuOpen ? 'block' : 'hidden lg:block'} bg-cream-200`}>
+      {/* Navigation */}
+      <nav className={`${isMobileMenuOpen ? 'block' : 'hidden lg:block'} bg-cream-200 border-t border-gray-300`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row lg:justify-center lg:items-center">
-            {categories.map((category) => (
-              <button
-                key={category.id}
-                onClick={() => {
-                  onCategorySelect(category.id);
-                  setIsMobileMenuOpen(false);
-                }}
-                className={`flex items-center justify-center font-medium text-sm font-semibold uppercase tracking-wide px-6 py-3 transition-all
-                  ${
-                    selectedCategory === category.id
-                      ? 'underline underline-offset-4 decoration-2 font-bold text-black'
-                      : 'text-black hover:underline underline-offset-4'
-                  }`}
-              >
-                {category.label}
-              </button>
+            {mainMenuItems.map((item) => (
+              <div key={item.id} className="relative group">
+                {item.hasSubmenu ? (
+                  <>
+                    {/* Desktop submenu */}
+                    <button
+                      className="hidden lg:flex items-center justify-center font-medium text-sm font-semibold uppercase tracking-wide px-6 py-3 transition-all text-black hover:underline underline-offset-4"
+                    >
+                      {item.label}
+                      <ChevronDown size={14} className="ml-1" />
+                    </button>
+                    
+                    {/* Desktop dropdown */}
+                    <div className="hidden lg:block absolute top-full left-0 bg-white border border-gray-300 shadow-lg min-w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                      {item.submenu?.map((subItem) => (
+                        <button
+                          key={subItem.id}
+                          onClick={() => handleMenuItemClick(subItem)}
+                          className={`block w-full text-left px-4 py-3 text-sm hover:bg-cream-100 transition-colors ${
+                            selectedCategory === subItem.id ? 'bg-cream-200 font-semibold' : ''
+                          }`}
+                        >
+                          {subItem.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Mobile submenu */}
+                    <div className="lg:hidden">
+                      <button
+                        onClick={() => handleSubmenuToggle(item.id)}
+                        className="flex items-center justify-between w-full font-medium text-sm font-semibold uppercase tracking-wide px-6 py-3 transition-all text-black hover:underline underline-offset-4"
+                      >
+                        {item.label}
+                        <ChevronDown 
+                          size={14} 
+                          className={`transition-transform ${openSubmenu === item.id ? 'rotate-180' : ''}`} 
+                        />
+                      </button>
+                      
+                      {openSubmenu === item.id && (
+                        <div className="bg-cream-100 border-t border-gray-300">
+                          {item.submenu?.map((subItem) => (
+                            <button
+                              key={subItem.id}
+                              onClick={() => handleMenuItemClick(subItem)}
+                              className={`block w-full text-left px-8 py-2 text-sm hover:bg-cream-200 transition-colors ${
+                                selectedCategory === subItem.id ? 'bg-cream-200 font-semibold' : ''
+                              }`}
+                            >
+                              {subItem.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => handleMenuItemClick(item)}
+                    className="flex items-center justify-center font-medium text-sm font-semibold uppercase tracking-wide px-6 py-3 transition-all text-black hover:underline underline-offset-4 w-full lg:w-auto"
+                  >
+                    {item.label}
+                  </button>
+                )}
+              </div>
             ))}
           </div>
         </div>
       </nav>
-
 
       {/* Headlines ticker */}
       {latestHeadlines && latestHeadlines.length > 0 && (

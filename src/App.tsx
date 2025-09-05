@@ -3,6 +3,7 @@ import { Routes, Route, useNavigate } from 'react-router-dom';
 import Header from './components/Header';
 import HomePage from './pages/HomePage';
 import ArticlePage from './pages/ArticlePage';
+import CwordPage from './pages/CwordPage';
 import useGitHubContent from './hooks/useGitHubContent';
 
 interface Article {
@@ -109,6 +110,10 @@ function App() {
           <Route
             path="/article/:articleId"
             element={<ArticlePage articles={articles} />}
+          />
+          <Route
+            path="/cword"
+            element={<CwordPage />}
           />
         </Routes>
       )}
