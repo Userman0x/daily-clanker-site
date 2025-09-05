@@ -16,9 +16,10 @@ interface Article {
 interface ArticleCardProps {
   article: Article;
   onClick: (article: Article) => void;
+  onCategorySelect: (category: string) => void; // <-- new prop
 }
 
-const ArticleCard: React.FC<ArticleCardProps> = ({ article, onClick }) => {
+const ArticleCard: React.FC<ArticleCardProps> = ({ article, onClick, onCategorySelect }) => {
   return (
     <article 
       className="cursor-pointer group"
@@ -37,14 +38,18 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ article, onClick }) => {
       
       <div>
         <div className="flex items-center space-x-2 mb-2">
-          <span className="text-xs text-black font-semibold uppercase tracking-wide">
+          {/* Clickable category */}
+          <span 
+            className="text-xs text-black font-semibold uppercase cursor-pointer hover:underline"
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent triggering article click
+              onCategorySelect(article.category);
+            }}
+          >
             {article.category}
           </span>
           <span className="text-xs text-gray-600">
-            {new Date(article.date).toLocaleDateString('en-US', { 
-              month: 'short', 
-              day: 'numeric' 
-            })}
+            {new Date(article.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
           </span>
         </div>
         
@@ -62,7 +67,6 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ article, onClick }) => {
             {article.excerpt}
           </ReactMarkdown>
         </div>
-
       </div>
     </article>
   );

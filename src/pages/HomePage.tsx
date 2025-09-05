@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import ArticleCard from '../components/ArticleCard';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useNavigate } from 'react-router-dom';
@@ -16,115 +16,168 @@ interface Article {
   category: string;
 }
 
-// REMOVE the searchQuery and selectedCategory props from this interface
 interface HomePageProps {
   articles: Article[];
   loading: boolean;
+  selectedCategory: string;
+  scrollToTop: boolean;
+  setScrollToTop: (value: boolean) => void;
+  page: number;
+  setPage: React.Dispatch<React.SetStateAction<number>>;
+  onCategorySelect: (category: string) => void; // <-- add this
 }
+
+const ARTICLES_PER_PAGE = 15;
 
 const HomePage: React.FC<HomePageProps> = ({
   articles,
-  loading
+  loading,
+  selectedCategory,
+  scrollToTop,
+  setScrollToTop,
+  page,
+  setPage,
+  onCategorySelect,
 }) => {
   const navigate = useNavigate();
+  const featuredRef = useRef<HTMLElement>(null);
+  const articlesTopRef = useRef<HTMLDivElement>(null); // ref for regular articles
 
-  const handleArticleClick = (article: Article) => {
-    navigate(`/article/${article.id}`);
+  const handleArticleClick = (article: Article) => navigate(`/article/${article.id}`);
+  const isAll = selectedCategory === 'all';
+
+  let featuredArticle: Article | null = null;
+  let regularArticles: Article[] = [];
+
+  if (isAll && articles.length > 0) {
+    featuredArticle = articles[0];
+    regularArticles = articles.slice(1);
+  } else {
+    regularArticles = articles;
+  }
+
+  const totalPages = Math.ceil(regularArticles.length / ARTICLES_PER_PAGE);
+  const startIndex = (page - 1) * ARTICLES_PER_PAGE;
+  const endIndex = startIndex + ARTICLES_PER_PAGE;
+  const pageArticles = regularArticles.slice(startIndex, endIndex);
+
+  useEffect(() => {
+  if (!scrollToTop) return;
+
+  const header = document.querySelector('header') as HTMLElement | null;
+  const headerHeight = header?.getBoundingClientRect().height || 0;
+
+  const container = document.querySelector('main') as HTMLElement | null;
+  const containerPaddingTop = container ? parseFloat(getComputedStyle(container).paddingTop) || 0 : 0;
+
+  let scrollTarget = 0;
+
+  if (isAll) {
+    // Latest / Home page
+    if (page === 1 && featuredRef.current) {
+      scrollTarget = featuredRef.current.offsetTop - (headerHeight + containerPaddingTop);
+    } else if (articlesTopRef.current) {
+      scrollTarget = articlesTopRef.current.offsetTop - (headerHeight + containerPaddingTop);
+    }
+  } else if (articlesTopRef.current) {
+    scrollTarget = articlesTopRef.current.offsetTop - (headerHeight + containerPaddingTop);
+  }
+
+  window.scrollTo({ top: scrollTarget, behavior: 'smooth' });
+  setScrollToTop(false);
+
+}, [scrollToTop, isAll, page, selectedCategory, setScrollToTop]);
+
+
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+    setScrollToTop(true); // trigger scroll
   };
 
-  const featuredArticle = articles[0];
-  const regularArticles = articles.slice(1);
-
   return (
-    <div className="min-h-screen  bg-cream-200">
-      {/* The Header component has been removed from here */}
-      
+    <div className="min-h-screen bg-cream-200">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {loading ? (
           <LoadingSpinner />
+        ) : articles.length === 0 ? (
+          <div className="text-center py-12">
+            <h3 className="text-xl font-bold text-black mb-2">No articles found</h3>
+            <p className="text-gray-700">Try adjusting your search terms or selecting a different category.</p>
+          </div>
         ) : (
-          <>
-            {articles.length === 0 ? (
-              <div className="text-center py-12">
-                <h3 className="text-xl font-bold text-black mb-2">No articles found</h3>
-                <p className="text-gray-700">
-                  Try adjusting your search terms or selecting a different category.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-8">
-                {/* Featured Article */}
-                {featuredArticle && (
-                  <section className="border-b border-gray-800 pb-8">
-                    <div 
-                      className="grid lg:grid-cols-2 gap-8 cursor-pointer group"
-                      onClick={() => handleArticleClick(featuredArticle)}
-                    >
-                      <div className="order-2 lg:order-1">
-                        <div className="flex items-center space-x-2 mb-3">
-                          <span className="px-2 py-1 bg-black text-cream-50 rounded text-xs font-semibold uppercase tracking-wide">
-                            {featuredArticle.category}
-                          </span>
-                          <span className="text-xs text-gray-600 uppercase tracking-wide">
-                            {new Date(featuredArticle.date).toLocaleDateString('en-US', { 
-                              month: 'short', 
-                              day: 'numeric',
-                              year: 'numeric'
-                            })}
-                          </span>
-                        </div>
-                        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-black mb-4 font-serif leading-tight group-hover:text-gray-700 transition-colors">
-                          {featuredArticle.title}
-                        </h1>
-                        
-                        <div className="text-lg text-gray-800 mb-4 leading-relaxed">
-                            <ReactMarkdown 
-                              remarkPlugins={[remarkGfm]}
-                              components={{
-                                a: ({ children }) => <>{children}</>,
-                              }}
-                            >
-                              {featuredArticle.excerpt}
-                            </ReactMarkdown>
-                        </div>
-                        
-                        <p className="text-sm text-gray-600 font-medium">
-                          By {featuredArticle.author}
-                        </p>
-                      </div>
-                      <div className="order-1 lg:order-2">
-                        <div className="aspect-[4/3] overflow-hidden">
-                          <img 
-                            src={featuredArticle.image} 
-                            alt={featuredArticle.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                            onError={(e) => {
-                              e.currentTarget.src = 'https://images.pexels.com/photos/518543/pexels-photo-518543.jpeg?auto=compress&cs=tinysrgb&w=800';
-                            }}
-                          />
-                        </div>
-                      </div>
+          <div className="space-y-8">
+            {/* Featured Article */}
+            {isAll && featuredArticle && (
+              <section
+                ref={featuredRef}
+                className="border-b border-gray-800 pb-8 cursor-pointer"
+                onClick={() => handleArticleClick(featuredArticle)}
+              >
+                <div className="grid lg:grid-cols-2 gap-8">
+                  <div className="order-2 lg:order-1">
+                    <div className="flex items-center space-x-2 mb-3">
+                      <span
+                        className="px-2 py-1 bg-black text-cream-50 rounded text-xs font-semibold uppercase tracking-wide cursor-pointer hover:opacity-80"
+                        onClick={(e) => {
+                          e.stopPropagation(); // prevent navigating to article
+                          onCategorySelect(featuredArticle.category);
+                        }}
+                      >
+                        {featuredArticle.category}
+                      </span>
+                      <span className="text-xs text-gray-600 uppercase tracking-wide">
+                        {new Date(featuredArticle.date).toLocaleDateString()}
+                      </span>
                     </div>
-                  </section>
-                )}
-
-                {/* Regular Articles Grid */}
-                {regularArticles.length > 0 && (
-                  <section>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
-                      {regularArticles.map((article) => (
-                        <ArticleCard
-                          key={article.id}
-                          article={article}
-                          onClick={handleArticleClick}
-                        />
-                      ))}
+                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-black mb-4 font-serif leading-tight">
+                      {featuredArticle.title}
+                    </h1>
+                    <div className="text-lg text-gray-800 mb-4 leading-relaxed">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {featuredArticle.excerpt}
+                      </ReactMarkdown>
                     </div>
-                  </section>
-                )}
-              </div>
+                    <p className="text-sm text-gray-600 font-medium">By {featuredArticle.author}</p>
+                  </div>
+                  <div className="order-1 lg:order-2">
+                    <div className="aspect-[4/3] overflow-hidden">
+                      <img
+                        src={featuredArticle.image}
+                        alt={featuredArticle.title}
+                        loading="lazy"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </section>
             )}
-          </>
+
+            {/* Regular Articles */}
+            {pageArticles.length > 0 && (
+              <section ref={articlesTopRef}>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
+                  {pageArticles.map(article => (
+                    <ArticleCard 
+                      key={article.id} 
+                      article={article} 
+                      onClick={handleArticleClick} 
+                      onCategorySelect={onCategorySelect} // pass down from props
+                    />
+                  ))}
+                </div>
+
+                {/* Pagination */}
+                <div className="flex justify-center items-center space-x-3 mt-8">
+                  <button disabled={page === 1} onClick={() => handlePageChange(1)} className="px-3 py-1 bg-black text-cream-50 rounded disabled:opacity-50">&laquo;</button>
+                  <button disabled={page === 1} onClick={() => handlePageChange(page - 1)} className="px-3 py-1 bg-black text-cream-50 rounded disabled:opacity-50">&lt;</button>
+                  <span className="px-3 py-1">Page {page} of {totalPages}</span>
+                  <button disabled={page === totalPages} onClick={() => handlePageChange(page + 1)} className="px-3 py-1 bg-black text-cream-50 rounded disabled:opacity-50">&gt;</button>
+                  <button disabled={page === totalPages} onClick={() => handlePageChange(totalPages)} className="px-3 py-1 bg-black text-cream-50 rounded disabled:opacity-50">&raquo;</button>
+                </div>
+              </section>
+            )}
+          </div>
         )}
       </main>
 

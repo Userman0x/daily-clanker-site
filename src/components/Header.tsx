@@ -133,29 +133,31 @@ const Header: React.FC<HeaderProps> = ({
         )}
       </div>
 
-      {/* Navigation */}
-      <nav className={`border-t border-gray-800 ${isMobileMenuOpen ? 'block' : 'hidden lg:block'}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:flex-row lg:space-x-8">
-            {categories.map((category) => (
-              <button
-                key={category.id}
-                onClick={() => {
-                  onCategorySelect(category.id);
-                  setIsMobileMenuOpen(false);
-                }}
-                className={`text-left font-medium py-3 lg:py-4 transition-colors border-b border-gray-300 lg:border-none last:border-none ${
+      <nav className={`${isMobileMenuOpen ? 'block' : 'hidden lg:block'} bg-cream-200`}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col lg:flex-row lg:justify-center lg:items-center">
+          {categories.map((category) => (
+            <button
+              key={category.id}
+              onClick={() => {
+                onCategorySelect(category.id);
+                setIsMobileMenuOpen(false);
+              }}
+              className={`flex items-center justify-center font-medium text-sm font-semibold uppercase tracking-wide border-b-2 px-6 py-3 transition-colors
+                ${
                   selectedCategory === category.id
-                    ? 'text-black  bg-cream-200 lg:bg-transparent px-4 lg:px-0 lg:border-b-2 lg:border-black'
-                    : 'text-gray-700 hover:text-black px-4 lg:px-0'
-                } text-sm font-semibold uppercase tracking-wide`}
-              >
-                {category.label}
-              </button>
-            ))}
-          </div>
+                    ? 'border-cream-50 bg-black text-cream-50'
+                    : 'border-transparent bg-cream-200 text-black hover:bg-black hover:text-cream-50'
+                }`}
+            >
+              {category.label}
+            </button>
+          ))}
         </div>
-      </nav>
+      </div>
+    </nav>
+
+
 
       {/* Headlines ticker */}
       {latestHeadlines && latestHeadlines.length > 0 && (

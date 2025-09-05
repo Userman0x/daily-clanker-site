@@ -19,6 +19,8 @@ interface Article {
 function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [scrollToTop, setScrollToTop] = useState(false);
+  const [page, setPage] = useState(1);
   const navigate = useNavigate();
 
   const { articles, loading, error } = useGitHubContent({
@@ -35,35 +37,34 @@ function App() {
     return [];
   }, [articles]);
 
-  const filteredArticles = useMemo(() => {
-    let filtered = articles;
+  const filteredArticles: Article[] = useMemo(() => {
+    if (!articles) return [];
+    const normalizedCategory = selectedCategory.toLowerCase();
+    const normalizedSearch = searchQuery.toLowerCase();
 
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter(article =>
-        article.category.toLowerCase() === selectedCategory.toLowerCase()
-      );
-    }
-
-    if (searchQuery) {
-      filtered = filtered.filter(article =>
-        article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        article.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        article.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        article.category.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    return filtered;
+    return articles.filter(article => {
+      const articleCategory = article.category.toLowerCase();
+      const matchesCategory = normalizedCategory === 'all' || articleCategory === normalizedCategory;
+      const matchesSearch =
+        !searchQuery ||
+        article.title.toLowerCase().includes(normalizedSearch) ||
+        article.excerpt.toLowerCase().includes(normalizedSearch) ||
+        article.author.toLowerCase().includes(normalizedSearch) ||
+        article.category.toLowerCase().includes(normalizedSearch);
+      return matchesCategory && matchesSearch;
+    });
   }, [articles, searchQuery, selectedCategory]);
 
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-  };
+  const handleSearch = (query: string) => setSearchQuery(query);
 
   const handleCategorySelect = (category: string) => {
     setSelectedCategory(category);
     setSearchQuery('');
     navigate('/');
+
+    // Reset to first page & scroll to top
+    setPage(1);
+    setScrollToTop(true);
   };
 
   return (
@@ -96,6 +97,12 @@ function App() {
               <HomePage
                 articles={filteredArticles}
                 loading={loading}
+                selectedCategory={selectedCategory}
+                scrollToTop={scrollToTop}
+                setScrollToTop={setScrollToTop}
+                page={page}
+                setPage={setPage}
+                onCategorySelect={handleCategorySelect}
               />
             }
           />

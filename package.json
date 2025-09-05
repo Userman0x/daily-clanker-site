@@ -4,14 +4,14 @@
   "version": "0.0.0",
   "type": "module",
   "homepage": "https://Userman0x.github.io/daily-clanker-site",
- "scripts": {
-  "dev": "vite",
-  "build": "vite build",
-  "preview": "vite preview",
-  "lint": "eslint .",
-  "predeploy": "npm run build",
-  "deploy": "gh-pages -d dist --repo https://github.com/Userman0x/daily-clanker-site.git"
-},
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint .",
+    "predeploy": "npm run build && node scripts/copy-404.js",
+    "deploy": "gh-pages -d dist --repo https://github.com/Userman0x/daily-clanker-site.git"
+  },
   "dependencies": {
     "@tailwindcss/typography": "^0.5.16",
     "lucide-react": "^0.344.0",
@@ -23,10 +23,12 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.9.1",
+    "@types/node": "^24.3.1",
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.18",
+    "cross-env": "^10.0.0",
     "eslint": "^9.9.1",
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
     "eslint-plugin-react-refresh": "^0.4.11",
