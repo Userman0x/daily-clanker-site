@@ -34,6 +34,7 @@ const Header: React.FC<HeaderProps> = ({
   { id: 'business', label: 'Business' },
   { id: 'politics', label: 'Politics' },
   { id: 'gaming', label: 'Gaming' },
+  { id: 'opinion', label: 'Opinion' }
 ];
 
   const toggleMobileMenu = () => {
