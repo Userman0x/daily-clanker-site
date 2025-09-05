@@ -134,29 +134,28 @@ const Header: React.FC<HeaderProps> = ({
       </div>
 
       <nav className={`${isMobileMenuOpen ? 'block' : 'hidden lg:block'} bg-cream-200`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col lg:flex-row lg:justify-center lg:items-center">
-          {categories.map((category) => (
-            <button
-              key={category.id}
-              onClick={() => {
-                onCategorySelect(category.id);
-                setIsMobileMenuOpen(false);
-              }}
-              className={`flex items-center justify-center font-medium text-sm font-semibold uppercase tracking-wide border-b-2 px-6 py-3 transition-colors
-                ${
-                  selectedCategory === category.id
-                    ? 'border-cream-50 bg-black text-cream-50'
-                    : 'border-transparent bg-cream-200 text-black hover:bg-black hover:text-cream-50'
-                }`}
-            >
-              {category.label}
-            </button>
-          ))}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col lg:flex-row lg:justify-center lg:items-center">
+            {categories.map((category) => (
+              <button
+                key={category.id}
+                onClick={() => {
+                  onCategorySelect(category.id);
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`flex items-center justify-center font-medium text-sm font-semibold uppercase tracking-wide px-6 py-3 transition-all
+                  ${
+                    selectedCategory === category.id
+                      ? 'underline underline-offset-4 decoration-2 font-bold text-black'
+                      : 'text-black hover:underline underline-offset-4'
+                  }`}
+              >
+                {category.label}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
-    </nav>
-
+      </nav>
 
 
       {/* Headlines ticker */}
