@@ -77,15 +77,12 @@ const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="bg-cream-200 border-b border-gray-800 sticky top-0 z-50">
-      {/* Top banner */}
       <div className="bg-black text-cream-50 text-center py-1 text-xs font-medium">
         ROBOT NEWS ONLY A HUMAN COULD BELIEVE
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Main header */}
         <div className="relative flex items-center justify-between py-4">
-          {/* Logo */}
           <button
             onClick={() => onCategorySelect('all')}
             className="flex items-center hover:opacity-80 transition-opacity"
@@ -97,7 +94,6 @@ const Header: React.FC<HeaderProps> = ({
             />
           </button>
 
-          {/* Centered title */}
           <button
             onClick={() => onCategorySelect('all')}
             className="absolute left-1/2 transform -translate-x-1/2 hover:opacity-80 transition-opacity"
@@ -112,26 +108,20 @@ const Header: React.FC<HeaderProps> = ({
             </div>
           </button>
 
-          {/* X Logo and Mobile Menu */}
           <div className="flex items-center space-x-4">
             <a
-  href="https://x.com"
-  target="_blank"
-  rel="noopener noreferrer"
-  className="flex items-center space-x-2 p-2 hover:bg-cream-300 rounded transition-colors"
-  aria-label="Follow us on X"
->
-  {/* Mobile: only the big X */}
-  <span className="text-2xl font-extrabold text-black lg:hidden">𝕏</span>
-
-  {/* Desktop: Follow on + big bold X */}
-  <span className="hidden lg:flex items-center space-x-2">
-    <span className="text-sm font-medium text-black">Follow on</span>
-    <span className="text-3xl font-extrabold text-black leading-none">𝕏</span>
-  </span>
-</a>
-
-
+              href="https://x.com/DailyClanker"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center space-x-2 p-2 hover:bg-cream-300 rounded transition-colors"
+              aria-label="Follow us on X"
+            >
+              <span className="text-2xl font-extrabold text-black lg:hidden">𝕏</span>
+              <span className="hidden lg:flex items-center space-x-2">
+                <span className="text-sm font-medium text-black">Follow on</span>
+                <span className="text-3xl font-extrabold text-black leading-none">𝕏</span>
+              </span>
+            </a>
 
             <button onClick={toggleMobileMenu} className="lg:hidden p-2 hover:bg-cream-300 rounded">
               <Menu size={20} />
@@ -141,70 +131,84 @@ const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Navigation */}
-      <nav className={`${isMobileMenuOpen ? 'block' : 'hidden lg:block'} bg-cream-200 border-t border-gray-300`}>
+      <nav className="bg-cream-200 border-t border-gray-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:flex-row lg:justify-center lg:items-center">
+          {/* Desktop menu */}
+          <div className="hidden lg:flex justify-center items-center">
             {mainMenuItems.map((item) => (
               <div key={item.id} className="relative group">
                 {item.hasSubmenu ? (
                   <>
-                    {/* Desktop submenu */}
                     <button
-                      className="hidden lg:flex items-center justify-center font-medium text-sm font-semibold uppercase tracking-wide px-6 py-3 transition-all text-black hover:underline underline-offset-4"
+                      className="flex items-center justify-center font-medium text-sm font-semibold uppercase tracking-wide px-6 py-3 transition-all text-black hover:underline underline-offset-4 text-center"
                     >
                       {item.label}
                       <ChevronDown size={14} className="ml-1" />
                     </button>
-                    
-                    {/* Desktop dropdown */}
-                    <div className="hidden lg:block absolute top-full left-0 bg-white border border-gray-300 shadow-lg min-w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+
+                    <div className="absolute top-full left-0 bg-white border border-gray-300 shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 w-full">
                       {item.submenu?.map((subItem) => (
                         <button
                           key={subItem.id}
                           onClick={() => handleMenuItemClick(subItem)}
-                          className={`block w-full text-left px-4 py-3 text-sm hover:bg-cream-100 transition-colors ${
+                          className={`w-full text-left px-4 py-3 text-sm hover:bg-cream-100 transition-colors ${
                             selectedCategory === subItem.id ? 'bg-cream-200 font-semibold' : ''
                           }`}
                         >
-                          {subItem.label}
+                          {subItem.label.toUpperCase()}
                         </button>
                       ))}
-                    </div>
-
-                    {/* Mobile submenu */}
-                    <div className="lg:hidden">
-                      <button
-                        onClick={() => handleSubmenuToggle(item.id)}
-                        className="flex items-center justify-between w-full font-medium text-sm font-semibold uppercase tracking-wide px-6 py-3 transition-all text-black hover:underline underline-offset-4"
-                      >
-                        {item.label}
-                        <ChevronDown 
-                          size={14} 
-                          className={`transition-transform ${openSubmenu === item.id ? 'rotate-180' : ''}`} 
-                        />
-                      </button>
-                      
-                      {openSubmenu === item.id && (
-                        <div className="bg-cream-100 border-t border-gray-300">
-                          {item.submenu?.map((subItem) => (
-                            <button
-                              key={subItem.id}
-                              onClick={() => handleMenuItemClick(subItem)}
-                              className={`block w-full text-left px-8 py-2 text-sm hover:bg-cream-200 transition-colors ${
-                                selectedCategory === subItem.id ? 'bg-cream-200 font-semibold' : ''
-                              }`}
-                            >
-                              {subItem.label}
-                            </button>
-                          ))}
-                        </div>
-                      )}
                     </div>
                   </>
                 ) : (
                   <button
                     onClick={() => handleMenuItemClick(item)}
-                    className="flex items-center justify-center font-medium text-sm font-semibold uppercase tracking-wide px-6 py-3 transition-all text-black hover:underline underline-offset-4 w-full lg:w-auto"
+                    className="flex items-center justify-center font-medium text-sm font-semibold uppercase tracking-wide px-6 py-3 transition-all text-black hover:underline underline-offset-4 text-center"
+                  >
+                    {item.label}
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+
+
+          {/* Mobile menu */}
+          <div className={`${isMobileMenuOpen ? 'block' : 'hidden'} lg:hidden flex flex-col`}>
+            {mainMenuItems.map((item) => (
+              <div key={item.id} className="w-full">
+                {item.hasSubmenu ? (
+                  <>
+                    <button
+                      onClick={() => handleSubmenuToggle(item.id)}
+                      className="flex items-center w-full font-medium text-sm font-semibold uppercase tracking-wide px-6 py-3 transition-all text-black"
+                    >
+                      <span className="flex-1">{item.label}</span>
+                      <ChevronDown
+                        size={14}
+                        className={`transition-transform ${openSubmenu === item.id ? 'rotate-180' : ''}`}
+                      />
+                    </button>
+                    {openSubmenu === item.id && (
+                      <div className="bg-cream-100 border-t border-gray-300 flex flex-col w-full">
+                        {item.submenu?.map((subItem) => (
+                          <button
+                            key={subItem.id}
+                            onClick={() => handleMenuItemClick(subItem)}
+                            className={`block w-full text-center px-6 py-3 text-sm hover:bg-cream-200 transition-colors ${
+                              selectedCategory === subItem.id ? 'bg-cream-200 font-semibold' : ''
+                            }`}
+                          >
+                            {subItem.label.toUpperCase()}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <button
+                    onClick={() => handleMenuItemClick(item)}
+                    className="flex justify-center w-full font-medium text-sm font-semibold uppercase tracking-wide px-6 py-3 text-black text-center"
                   >
                     {item.label}
                   </button>
@@ -215,11 +219,11 @@ const Header: React.FC<HeaderProps> = ({
         </div>
       </nav>
 
+
       {/* Headlines ticker */}
       {latestHeadlines && latestHeadlines.length > 0 && (
         <div className="overflow-hidden bg-black border-t border-gray-800">
           <div className="flex animate-marquee">
-            {/* Map over the array twice to create a continuous scroll effect */}
             {[...latestHeadlines, ...latestHeadlines].map((headline, index) => (
               <Link
                 key={index}
@@ -233,19 +237,18 @@ const Header: React.FC<HeaderProps> = ({
         </div>
       )}
 
-      {/* Marquee CSS */}
       <style>
-      {`
-        @keyframes marquee {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        .animate-marquee {
-          display: flex;
-          width: max-content;
-          animation: marquee 60s linear infinite;
-        }
-      `}
+        {`
+          @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+          }
+          .animate-marquee {
+            display: flex;
+            width: max-content;
+            animation: marquee 60s linear infinite;
+          }
+        `}
       </style>
     </header>
   );

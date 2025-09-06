@@ -1,16 +1,79 @@
-import React, { useEffect } from 'react';
-import { ArrowLeft, TrendingUp, Users, Shield, Zap, ExternalLink, Copy } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import {
+  ArrowLeft,
+  ExternalLink,
+  Copy
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
+// Example features & roadmap items
+const features = [
+  {
+    icon: "🔥",
+    title: "Auto-Burn",
+    description: "If someone dies or loses their keys, their $CWORD automatically goes up in flames. Totally AI-controlled, of course."
+  },
+  {
+    icon: "🤖",
+    title: "AI-Powered",
+    description: "All satirical content is written by an algorithm. No humans were involved (except the overpriced API subscription)."
+  },
+  {
+    icon: "💸",
+    title: "1% Tax",
+    description: "Every transaction pays a 1% fee—funding the AI overlords’ API access, because humor isn’t free."
+  },
+];
+
+
+const roadmapItems = [
+  { phase: "Phase 1", title: "Launch", status: "Current", items: ["Website live", "Token distribution"] },
+  { phase: "Phase 2", title: "Growth", status: "Coming Soon", items: ["Community events", "Marketing campaigns"] },
+];
+
+const formatNumber = (num: number) => {
+  if (!num) return "--";
+  if (num >= 1_000_000) return `$${(num / 1_000_000).toFixed(2)}M`;
+  if (num >= 1_000) return `$${(num / 1_000).toFixed(0)}K`;
+  return `$${num.toFixed(2)}`;
+};
+
 
 const CwordPage: React.FC = () => {
-  const navigate = useNavigate();
-  const [copied, setCopied] = React.useState(false);
+  const navigate = useNavigate();useEffect(() => {
+  // Scroll to top when this page mounts
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}, []);
 
-  const contractAddress = "0x1234567890abcdef1234567890abcdef12345678"; // Replace with actual contract address
+  const [copied, setCopied] = useState(false);
+  const [tokenData, setTokenData] = useState<any>(null);
+  const contractAddress = "ACbRrERR5GJnADhLhhanxrDCXJzGhyF64SKihbzBpump";
 
   useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
+    const fetchTokenData = async () => {
+      try {
+        const resp = await fetch(
+          `https://api.dexscreener.com/latest/dex/tokens/${contractAddress}`
+        );
+        const data = await resp.json();
+        if (data.pairs && data.pairs.length > 0) {
+          const info = data.pairs[0];
+          setTokenData({
+            price: parseFloat(info.priceUsd),
+            liquidity: info.liquidity?.usd,
+            volume24h: info.volume?.h24,
+            marketCap: info.fdv,
+          });
+        }
+      } catch (err) {
+        console.error("Error fetching DexScreener price:", err);
+      }
+    };
+
+    fetchTokenData();
+    const interval = setInterval(fetchTokenData, 15000);
+    return () => clearInterval(interval);
+  }, [contractAddress]);
 
   const handleCopyAddress = async () => {
     try {
@@ -18,59 +81,15 @@ const CwordPage: React.FC = () => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.error('Failed to copy address:', err);
+      console.error("Failed to copy address:", err);
     }
   };
-
-  const features = [
-    {
-      icon: <TrendingUp className="w-8 h-8" />,
-      title: "Deflationary Mechanics",
-      description: "Built-in burn mechanisms reduce supply over time, creating scarcity and potential value appreciation."
-    },
-    {
-      icon: <Users className="w-8 h-8" />,
-      title: "Community Driven",
-      description: "Governance tokens allow holders to vote on key decisions affecting the Daily Clanker ecosystem."
-    },
-    {
-      icon: <Shield className="w-8 h-8" />,
-      title: "Audited & Secure",
-      description: "Smart contracts have been thoroughly audited by leading security firms to ensure safety."
-    },
-    {
-      icon: <Zap className="w-8 h-8" />,
-      title: "Utility Token",
-      description: "Use $CWORD for premium content access, exclusive features, and ecosystem rewards."
-    }
-  ];
-
-  const roadmapItems = [
-    {
-      phase: "Phase 1",
-      title: "Token Launch",
-      status: "Current",
-      items: ["Token deployment", "Initial liquidity provision", "Community building"]
-    },
-    {
-      phase: "Phase 2",
-      title: "Platform Integration",
-      status: "Coming Soon",
-      items: ["Premium content gating", "Staking rewards", "Governance implementation"]
-    },
-    {
-      phase: "Phase 3",
-      title: "Ecosystem Expansion",
-      status: "Future",
-      items: ["NFT marketplace", "Cross-chain bridge", "Mobile app launch"]
-    }
-  ];
 
   return (
     <div className="min-h-screen bg-cream-200">
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate("/")}
           className="inline-flex items-center space-x-2 text-gray-700 hover:text-black transition-colors mb-8 font-medium underline"
         >
           <ArrowLeft size={16} />
@@ -100,30 +119,41 @@ const CwordPage: React.FC = () => {
                   className="p-1 hover:bg-gray-100 rounded transition-colors"
                   title="Copy contract address"
                 >
-                  <Copy size={14} className={copied ? "text-green-600" : "text-gray-500"} />
+                  <Copy
+                    size={14}
+                    className={copied ? "text-green-600" : "text-gray-500"}
+                  />
                 </button>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Stats Section */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+        {/* Live DexScreener Stats */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
           <div className="bg-white p-6 border border-gray-300 text-center">
-            <div className="text-2xl font-bold text-black mb-2">1B</div>
-            <div className="text-sm text-gray-600 uppercase tracking-wide">Total Supply</div>
+            <div className="text-2xl font-bold text-black mb-2">
+              {tokenData ? `$${tokenData.price.toFixed(6)}` : "--"}
+            </div>
+            <div className="text-sm text-gray-600 uppercase tracking-wide">Price</div>
           </div>
           <div className="bg-white p-6 border border-gray-300 text-center">
-            <div className="text-2xl font-bold text-black mb-2">5%</div>
-            <div className="text-sm text-gray-600 uppercase tracking-wide">Burn Rate</div>
-          </div>
-          <div className="bg-white p-6 border border-gray-300 text-center">
-            <div className="text-2xl font-bold text-black mb-2">10K+</div>
-            <div className="text-sm text-gray-600 uppercase tracking-wide">Holders</div>
-          </div>
-          <div className="bg-white p-6 border border-gray-300 text-center">
-            <div className="text-2xl font-bold text-black mb-2">$2.5M</div>
+            <div className="text-2xl font-bold text-black mb-2">
+              {formatNumber(tokenData?.marketCap)}
+            </div>
             <div className="text-sm text-gray-600 uppercase tracking-wide">Market Cap</div>
+          </div>
+          <div className="bg-white p-6 border border-gray-300 text-center">
+            <div className="text-2xl font-bold text-black mb-2">
+              {formatNumber(tokenData?.liquidity)}
+            </div>
+            <div className="text-sm text-gray-600 uppercase tracking-wide">Liquidity</div>
+          </div>
+          <div className="bg-white p-6 border border-gray-300 text-center">
+            <div className="text-2xl font-bold text-black mb-2">
+              {formatNumber(tokenData?.volume24h)}
+            </div>
+            <div className="text-sm text-gray-600 uppercase tracking-wide">24h Volume</div>
           </div>
         </div>
 
@@ -135,25 +165,17 @@ const CwordPage: React.FC = () => {
           <div className="grid md:grid-cols-2 gap-8">
             {features.map((feature, index) => (
               <div key={index} className="bg-white p-8 border border-gray-300">
-                <div className="text-black mb-4">
-                  {feature.icon}
-                </div>
-                <h3 className="text-xl font-bold text-black mb-3">
-                  {feature.title}
-                </h3>
-                <p className="text-gray-700 leading-relaxed">
-                  {feature.description}
-                </p>
+                <div className="text-black mb-4">{feature.icon}</div>
+                <h3 className="text-xl font-bold text-black mb-3">{feature.title}</h3>
+                <p className="text-gray-700 leading-relaxed">{feature.description}</p>
               </div>
             ))}
           </div>
         </section>
 
-        {/* Tokenomics Section */}
+        {/*
         <section className="mb-16">
-          <h2 className="text-3xl font-bold text-black mb-8 text-center font-serif">
-            Tokenomics
-          </h2>
+          <h2 className="text-3xl font-bold text-black mb-8 text-center font-serif">Tokenomics</h2>
           <div className="bg-white p-8 border border-gray-300">
             <div className="grid md:grid-cols-2 gap-8">
               <div>
@@ -164,6 +186,10 @@ const CwordPage: React.FC = () => {
                     <span className="font-semibold">40%</span>
                   </div>
                   <div className="flex justify-between items-center">
+                    <span className="text-gray-700">AI Overlords' Fee</span>
+                    <span className="font-semibold">1%</span>
+                  </div>
+                  <div className="flex justify-between items-center">
                     <span className="text-gray-700">Liquidity Pool</span>
                     <span className="font-semibold">25%</span>
                   </div>
@@ -172,42 +198,35 @@ const CwordPage: React.FC = () => {
                     <span className="font-semibold">20%</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-700">Marketing</span>
-                    <span className="font-semibold">10%</span>
-                  </div>
-                  <div className="flex justify-between items-center">
                     <span className="text-gray-700">Reserve</span>
-                    <span className="font-semibold">5%</span>
+                    <span className="font-semibold">14%</span>
                   </div>
                 </div>
               </div>
               <div>
                 <h3 className="text-xl font-bold text-black mb-4">Utility</h3>
                 <ul className="space-y-2 text-gray-700">
-                  <li>• Premium article access</li>
-                  <li>• Governance voting rights</li>
-                  <li>• Staking rewards</li>
-                  <li>• Exclusive content creation</li>
-                  <li>• Community events access</li>
-                  <li>• NFT marketplace currency</li>
+                  <li>• AI writes your daily satire for you</li>
+                  <li>• Auto-burns lost keys</li>
+                  <li>• 1% tax pays for overpriced APIs</li>
+                  <li>• You don’t need governance—AI decides everything</li>
                 </ul>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Roadmap Section */}
         <section className="mb-16">
-          <h2 className="text-3xl font-bold text-black mb-8 text-center font-serif">
-            Roadmap
-          </h2>
+          <h2 className="text-3xl font-bold text-black mb-8 text-center font-serif">Roadmap</h2>
           <div className="space-y-8">
-            {roadmapItems.map((item, index) => (
+            {[
+              { phase: "Phase 1", title: "Launch", status: "Current", items: ["AI writes first articles", "Token goes live"] },
+              { phase: "Phase 2", title: "Autopilot", status: "Coming Soon", items: ["All satire fully automated", "Burn mechanism activated"] },
+              { phase: "Phase 3", title: "Infinity", status: "Future", items: ["AI takes over the world (maybe)", "You just hodl $CWORD"] },
+            ].map((item, index) => (
               <div key={index} className="bg-white p-8 border border-gray-300">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-bold text-black">
-                    {item.phase}: {item.title}
-                  </h3>
+                  <h3 className="text-xl font-bold text-black">{item.phase}: {item.title}</h3>
                   <span className={`px-3 py-1 text-xs font-semibold uppercase tracking-wide ${
                     item.status === 'Current' 
                       ? 'bg-green-100 text-green-800' 
@@ -227,12 +246,12 @@ const CwordPage: React.FC = () => {
             ))}
           </div>
         </section>
+        */}
+
 
         {/* CTA Section */}
         <section className="text-center bg-black text-cream-50 p-12 mb-16">
-          <h2 className="text-3xl font-bold mb-4 font-serif">
-            Join the $CWORD Revolution
-          </h2>
+          <h2 className="text-3xl font-bold mb-4 font-serif">Join the $CWORD Revolution</h2>
           <p className="text-lg mb-8 text-cream-200 max-w-2xl mx-auto">
             Be part of the future of satirical journalism. Hold $CWORD and help shape the Daily Clanker ecosystem.
           </p>
